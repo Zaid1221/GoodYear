@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">GoodYear</string>
+
+    <string name="sentenceHint">TypeSentence</string>
+
+    <string name="button">Search</string>
+
+    <string name="resultHint">Results</string>
+</resources>
