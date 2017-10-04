@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">GoodYear</string>
 
-    <string name="sentenceHint">TypeSentence</string>
+    <string name="dateFromHint">Date From</string>
 
     <string name="button">Search</string>
 
-    <string name="resultHint">Results</string>
+    <string name="dateToHint">Date To</string>
+
+    <string name="resultHint">Result</string>
 </resources>
