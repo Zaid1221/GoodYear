@@ -25,6 +25,14 @@
         android:hint="@string/dateToHint"
         android:layout_margin="20dp" />
 
+    <EditText
+        android:id="@+id/Query"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:hint="Enter in search query"
+        android:layout_margin="20dp"/>
+
     <Button
         android:id="@+id/search_button"
         android:layout_width="wrap_content"

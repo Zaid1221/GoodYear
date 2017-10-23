@@ -2,6 +2,7 @@ package com.example.zaid.goodyear;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private String article;
     private TextView dateFrom;
     private TextView dateTo;
+    private EditText inputQuery;
     private TextView Result;
 
 
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         dateFrom = (TextView) findViewById(R.id.DateFrom);
         dateTo = (TextView) findViewById(R.id.DateTo);
+        inputQuery = (EditText) findViewById(R.id.Query);
         Result = (TextView) findViewById(R.id.result);
 
         Calendar c = Calendar.getInstance();
@@ -55,18 +58,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void searchMethod(View v) {
-        Uri builtUri = Uri.parse("https://api.nytimes.com/svc/search/v2/articlesearch.json").buildUpon()
-                .appendQueryParameter("api-key", "5cefecfee765dde6c9c943db4c891c88")
-                .appendQueryParameter("begin_date", dateFrom.getText().toString())
-                .appendQueryParameter("end_date", dateTo.getText().toString())
-                .build();
-        new yearEvaluation().execute(builtUri.toString());
+        BuildUriTimes();
+    }
 
+    public void BuildUriTimes(){
+        Uri builtUri = Uri.parse("https://api.nytimes.com/svc/search/v2/articlesearch.json").buildUpon()
+            .appendQueryParameter("api-key", "05cb6024971840939205aaa75206ee2a")
+            .appendQueryParameter("q", inputQuery.getText().toString())
+            .appendQueryParameter("begin_date", dateFrom.getText().toString())
+            .appendQueryParameter("end_date", dateTo.getText().toString())
+            .build();
+        BuildNYtimes(builtUri);
+    }
+
+    public void BuildNYtimes(Uri builtUri){
+        new yearEvaluation().execute(builtUri.toString());
+        BuildUriSentiment();
+    }
+
+    public void BuildUriSentiment(){
         Uri builtUri2 = Uri.parse("https://api.meaningcloud.com/sentiment-2.1").buildUpon()
-                .appendQueryParameter("api-key", "4bc349cc561c4e5d8e7023eff1bf7019")
-                .appendQueryParameter("txt", article)
-                .appendQueryParameter("lang", "en")
-                .build();
+            .appendQueryParameter("api-key", "f9d923ead87a27f37ff8bfb485feb895")
+            .appendQueryParameter("txt", "Trump")
+            .appendQueryParameter("lang", "en")
+            .build();
+        BuildSentiment(builtUri2);
+    }
+
+    public void BuildSentiment(Uri builtUri2){
         new FindSentimentTask().execute(builtUri2.toString());
         spinner.setVisibility(View.VISIBLE);
     }
@@ -75,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     public class yearEvaluation extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... url) {
-            //android.os.Debug.waitForDebugger();
+           // android.os.Debug.waitForDebugger();
             String toreturn = "Did not work";
             try {
                 toreturn = getResponseFromHttpUrl(url[0]);
@@ -93,29 +112,28 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject index;
 
                 String temp = "";
-                for(int i=0; i< Jarray.length(); i++){
+                for (int i = 0; i < Jarray.length(); i++) {
                     index = Jarray.getJSONObject(i);
                     temp += index.getString("headline");
                 }
 
                 String[] headlines = temp.split("\"main\":\"");
-                String ALLHEADLINES ="";
+                String ALLHEADLINES = "";
 
-                for(int i = 1; i < headlines.length; i++)
-                {
+                for (int i = 1; i < headlines.length; i++) {
                     String[] headlines2 = headlines[i].split("\"");
                     ALLHEADLINES += headlines2[0].toString() + " ";
                 }
-                //Result.setText(ALLHEADLINES);
+               //Result.setText(ALLHEADLINES);
                 article = ALLHEADLINES; //Set Variable to Be Analyzed in the Sentiment API
-
 
                 spinner.setVisibility(View.GONE);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            super.onPostExecute(sentimentData);
+            Result.setText(article);
+            //super.onPostExecute(sentimentData);
         }
     }
 
@@ -123,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... url) {
 
-            String toreturn = "Did not work";
+            String toreturn = "";
             try {
                 toreturn = getResponseFromHttpUrl(url[0]);
             } catch (Exception e) {
@@ -141,14 +159,10 @@ public class MainActivity extends AppCompatActivity {
             NONE: without sentiment*/
             try {
                 JSONObject sentimentJSON = new JSONObject(sentimentData);
-                //int x=5;
-                //((TextView)findViewById(R.id.textView2)).setText(sentimentJSON.toString());
-                //JSONObject status= sentimentJSON.getJSONObject("model");
+
                 String scoreTag = sentimentJSON.get("score_tag").toString();
                 String confidenceTag = sentimentJSON.get("confidence").toString();
                 String ironyTag = sentimentJSON.get("irony").toString();
-
-
 
                 Result.setText("Score Tag: " + scoreTag + "\n" + "Confidence: " + confidenceTag + "\n" + "Irony: " + ironyTag);
                 spinner.setVisibility(View.GONE);
@@ -159,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(sentimentData);
         }
     }
-
 
     public static String getResponseFromHttpUrl(String url) throws IOException {
         URL theURL = new URL(url);
