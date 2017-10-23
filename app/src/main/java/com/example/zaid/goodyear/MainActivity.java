@@ -76,25 +76,10 @@ public class MainActivity extends AppCompatActivity {
         BuildUriSentiment();
     }
 
-    public void BuildUriSentiment(){
-        Uri builtUri2 = Uri.parse("https://api.meaningcloud.com/sentiment-2.1").buildUpon()
-            .appendQueryParameter("api-key", "f9d923ead87a27f37ff8bfb485feb895")
-            .appendQueryParameter("txt", "Trump")
-            .appendQueryParameter("lang", "en")
-            .build();
-        BuildSentiment(builtUri2);
-    }
-
-    public void BuildSentiment(Uri builtUri2){
-        new FindSentimentTask().execute(builtUri2.toString());
-        spinner.setVisibility(View.VISIBLE);
-    }
-
-
     public class yearEvaluation extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... url) {
-           // android.os.Debug.waitForDebugger();
+            // android.os.Debug.waitForDebugger();
             String toreturn = "Did not work";
             try {
                 toreturn = getResponseFromHttpUrl(url[0]);
@@ -109,11 +94,10 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject Jarticle = new JSONObject(sentimentData);
                 JSONObject answer = Jarticle.getJSONObject("response");
                 JSONArray Jarray = answer.getJSONArray("docs");
-                JSONObject index;
 
                 String temp = "";
                 for (int i = 0; i < Jarray.length(); i++) {
-                    index = Jarray.getJSONObject(i);
+                    JSONObject index = Jarray.getJSONObject(i);
                     temp += index.getString("headline");
                 }
 
@@ -124,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                     String[] headlines2 = headlines[i].split("\"");
                     ALLHEADLINES += headlines2[0].toString() + " ";
                 }
-               //Result.setText(ALLHEADLINES);
+                //Result.setText(ALLHEADLINES);
                 article = ALLHEADLINES; //Set Variable to Be Analyzed in the Sentiment API
 
                 spinner.setVisibility(View.GONE);
@@ -133,15 +117,30 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             Result.setText(article);
-            //super.onPostExecute(sentimentData);
+            super.onPostExecute(sentimentData);
         }
     }
+
+    public void BuildUriSentiment(){
+        Uri builtUri2 = Uri.parse("https://api.meaningcloud.com/sentiment-2.1").buildUpon()
+            .appendQueryParameter("key", "f9d923ead87a27f37ff8bfb485feb895")
+            .appendQueryParameter("txt", article)
+            .appendQueryParameter("lang", "en")
+            .build();
+        BuildSentiment(builtUri2);
+    }
+
+    public void BuildSentiment(Uri builtUri2){
+        new FindSentimentTask().execute(builtUri2.toString());
+        spinner.setVisibility(View.VISIBLE);
+    }
+
 
     public class FindSentimentTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... url) {
 
-            String toreturn = "";
+            String toreturn = "No response";
             try {
                 toreturn = getResponseFromHttpUrl(url[0]);
             } catch (Exception e) {
